@@ -1,5 +1,6 @@
 /*global chrome*/
-import React from 'react'
+import React,{useRef} from 'react'
+import html2canvas from 'html2canvas'
 
 export default function Content(){
     
@@ -11,6 +12,7 @@ export default function Content(){
         url: "https://wompampsupport.azureedge.net/fetchimage?siteId=7575&v=2&jpgQuality=100&width=700&url=https%3A%2F%2Fi.kym-cdn.com%2Fentries%2Ficons%2Fmobile%2F000%2F000%2F091%2FTrollFace.jpg"
     })
 
+    const memeRef = useRef(null)
 
     function getImage(){
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
@@ -36,6 +38,23 @@ export default function Content(){
         })
     }
 
+    function downloadMeme() {
+        const memeDiv = memeRef.current;
+    
+        // Use html2canvas to capture the div content as an image
+        html2canvas(memeDiv, { allowTaint: true, useCORS: true }).then(canvas => {
+          // Convert the canvas to a data URL
+          const dataURL = canvas.toDataURL("image/png");
+    
+          // Create a temporary link element for downloading
+          const downloadLink = document.createElement("a");
+          downloadLink.href = dataURL;
+          downloadLink.download = "meme.png";
+    
+          // Trigger a click event on the link to start the download
+          downloadLink.click();
+        });
+      }
 
     return(
         <main>
@@ -58,7 +77,7 @@ export default function Content(){
                 />
             </div>
 
-            <div className="meme">
+            <div className="meme" ref={memeRef}>
                 <img src={meme.url} 
                 className="meme-img" 
                 alt=''
@@ -69,7 +88,7 @@ export default function Content(){
 
             <div className="btn-container">
                 <button className="image-btn" onClick={getImage}>Get Image</button>
-                <button className="download-btn" href=".meme" download="output.png">Download Meme</button>
+                <button className="download-btn" onClick={downloadMeme}>Download Meme</button>
             </div>
         </main>
     )
